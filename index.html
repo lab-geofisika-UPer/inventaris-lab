@@ -363,7 +363,7 @@ function formAset(id,isi={}){
   const err=m=>{$('#ferr').innerHTML=`<p class="err" role="alert"><b>Belum bisa disimpan.</b> ${m}</p>`;$('#ferr').scrollIntoView({block:'nearest'})};
   const nid=$('#f-id').value.trim().toUpperCase(),nama=$('#f-nama').value.trim(),jenis=$('#f-jenis').value,mode=$('#f-mode').value;
   if(!nama)return err('Isi nama aset.');
-  if(nid.includes('??'))return err('Isi tahun pengadaan (4 digit) supaya kode aset lengkap.');
+  if(nid.includes('??'))return err('Isi tahun pengadaan (4 digit) supaya kode aset lengkap, atau ketik kodenya sendiri.');
   const thn=$('#f-thn').value.trim();if(thn&&!/^\d{4}$/.test(thn))return err('Tahun pengadaan ditulis 4 digit, mis. 2018.');
   if(!/^[A-Z0-9][A-Z0-9\-\/.]{1,39}$/.test(nid))return err('Kode aset hanya huruf, angka, dan tanda - / . (mis. GF-MAG-001).');
   if((isNew||nid!==a.id)&&A.some(x=>x.id===nid))return err('Kode aset sudah dipakai barang lain.');
