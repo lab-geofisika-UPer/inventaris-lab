@@ -1,0 +1,9 @@
+{
+ "name": "Inventaris Lab Teknik Geofisika",
+ "short_name": "Inventaris Lab",
+ "start_url": "./",
+ "display": "standalone",
+ "background_color": "#F2F2F4",
+ "theme_color": "#F2F2F4",
+ "icons": [{"src": "logo.png", "sizes": "any", "type": "image/png", "purpose": "any"}]
+}
