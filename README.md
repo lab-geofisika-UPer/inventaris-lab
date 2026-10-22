@@ -11,7 +11,11 @@ Satu file `index.html`, tanpa server dan tanpa login. Data tersimpan di **Indexe
   - catatan,
   - riwayat catatan bertanggal.
 - Foto alat diperkecil ke 640 px. Tombol **Foto label, isi otomatis** membaca pelat nama dengan OCR (`fotoscan.js`, salinan dari SIM).
-- Kode aset disarankan otomatis (GF-XXX-001). Untuk kategori PC, nama otomatis COMPGP-PCxx.
+- Kode aset disarankan otomatis mengikuti Excel stok opname:
+  - Alat ukur: `GP-[metode][2 digit tahun pengadaan]-[nomor][jenis komponen]`, mis. `GP-GLS18-01A`. Metode: GLS, MAG, GPR, GRV, REF, PSF, GPS, SNV. Jenis komponen: A main unit, B kabel, C elektroda/geophone, D charger, E aksesoris, F sensor.
+  - PC: kode `GP-PC-001` dengan nama `COMPGP-PC01` (nomor selalu sama).
+  - Lainnya: `GP-LPT-001`, `GP-KRS-001`, `GP-MJA-001`.
+- Kolom tambahan: tahun pengadaan dan jenis komponen (keduanya juga ada di SIM).
 - Label QR 85 × 38 mm, 2 kolom per A4, dengan desain yang sama seperti label SIM.
 - Pindai QR atau barcode dari foto (Chrome Android, lewat `BarcodeDetector`).
 - Menu ⋯:

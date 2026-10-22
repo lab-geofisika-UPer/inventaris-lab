@@ -175,8 +175,6 @@ const ROOM_LAB={'R7101-U':'7101','R7101-D':'7101','R7306':'7306'};
 // kategori alat ukur & kodenya mengikuti "Stock Opname Lab Geofisika.xlsx" (II. Keterangan Kategori)
 const KAT0=[{n:'Geolistrik',j:'Alat ukur'},{n:'Magnetik',j:'Alat ukur'},{n:'GPR',j:'Alat ukur'},{n:'Gravity',j:'Alat ukur'},{n:'Refraksi',j:'Alat ukur'},{n:'Passive Seismic',j:'Alat ukur'},{n:'GPS',j:'Alat ukur'},{n:'Sonic Viewer',j:'Alat ukur'},{n:'Laptop',j:'Komputer'},{n:'PC',j:'Komputer'},{n:'Kursi',j:'Perabot'},{n:'Meja',j:'Perabot'}];
 const TIPE=[['A','A · Main unit'],['B','B · Kabel'],['C','C · Elektroda/Geophone'],['D','D · Charger'],['E','E · Aksesoris'],['F','F · Sensor']];
-// nama kategori dari pembaca label (sama dengan SIM) → nama kategori Excel
-window.SCAN_NAMA={'Gayaberat':'Gravity','Seismik':'Refraksi','Seismometer':'Passive Seismic','Survei':'GPS','Karakterisasi batuan (Vp/Vs)':'Sonic Viewer'};
 const lokKey=a=>a.ruang?'room:'+a.ruang:'lab:'+(a.lokasi||'7101');
 const lokTxt=a=>(LOK.find(l=>l[0]===lokKey(a))||[,a.lokasi||'-'])[1];
 const today=()=>new Date().toISOString().slice(0,10);
@@ -194,7 +192,9 @@ async function muat(){
  const d=await idb;
  await new Promise(ok=>{const t=d.transaction(['foto','meta']);const f=t.objectStore('foto'),m=t.objectStore('meta');
   f.openCursor().onsuccess=e=>{const c=e.target.result;if(c){FOTO[c.key]=c.value;c.continue()}};
-  m.get('meta').onsuccess=e=>{if(e.target.result)META=Object.assign(META,e.target.result);KAT0.forEach(k=>{if(!META.kategori.some(x=>x.n===k.n))META.kategori.push(k)})};t.oncomplete=ok});
+  m.get('meta').onsuccess=e=>{if(e.target.result)META=Object.assign(META,e.target.result);// kategori bawaan versi lama diganti nama Excel stok opname; yang masih dipakai aset tetap dipertahankan
+   META.kategori=META.kategori.filter(k=>!['Seismik','Seismometer','Gayaberat','Survei','Karakterisasi batuan (Vp/Vs)'].includes(k.n)||A.some(a=>a.kat===k.n));
+   KAT0.forEach(k=>{if(!META.kategori.some(x=>x.n===k.n))META.kategori.push(k)})};t.oncomplete=ok});
 }
 const simpanMeta=()=>tx('meta',m=>m.put(META,'meta'));
 async function tandaiUbah(){META.ubah=new Date().toISOString();await simpanMeta();if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}
