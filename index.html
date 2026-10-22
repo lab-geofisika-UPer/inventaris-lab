@@ -96,7 +96,8 @@ dialog h3{margin:0 0 12px;font-size:19px}
 .scan{display:flex;gap:14px;align-items:center;padding:12px;border:1px dashed var(--border);border-radius:16px;background:var(--surface-2)}
 #scanPrev{flex:none;width:84px;height:84px;border-radius:14px;overflow:hidden;display:grid;place-items:center;background:var(--surface);color:var(--muted)}
 #scanPrev img{width:100%;height:100%;object-fit:cover}
-.scan .hint{margin:6px 0 0}.scan-b{display:flex;flex-wrap:wrap;gap:6px}
+.scan>div:last-child{flex:1;min-width:0}
+.scan .hint{margin:6px 0 0}.scan-b{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
 .scan-hit{outline:2px solid var(--brand);outline-offset:1px;background:var(--brand-soft)!important}
 .krow{display:grid;grid-template-columns:2fr 70px 1.4fr 1fr 1fr 40px;gap:6px;margin-bottom:6px}
 .krow input,.krow select{min-height:40px;padding:6px 8px;font-size:14px}
@@ -278,8 +279,11 @@ window.addEventListener('hashchange',()=>{const m=location.hash.match(/^#a\/(.+)
 
 /* ---------- formulir tambah / edit (mengikuti asetDialog di SIM) ---------- */
 const katOf=j=>META.kategori.filter(k=>k.j===j).map(k=>k.n).sort((a,b)=>a.localeCompare(b,'id'));
+// singkatan kode per kategori, mengikuti kode yang dipakai di SIM (GF-MAG, GF-RES, GF-SON, dst.)
+const KODE_KAT={'Magnetik':'MAG','Geolistrik':'RES','GPR':'GPR','Survei':'SRV','Seismik':'SEI','Seismometer':'GEO','Gayaberat':'GRV',
+ 'Karakterisasi batuan (Vp/Vs)':'SON','Laptop':'LPT','PC':'PC','Kursi':'KRS','Meja':'MJA'};
 function saranKode(kat){
- const pfx='GF-'+((kat||'').normalize('NFD').replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase()||'AST');
+ const pfx='GF-'+(KODE_KAT[kat]||(kat||'').normalize('NFD').replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase()||'AST');
  let i=1;while(A.some(a=>a.id===`${pfx}-${String(i).padStart(3,'0')}`))i++;return `${pfx}-${String(i).padStart(3,'0')}`;
 }
 // nama komputer lab: COMPGP-PCxx, nomor melanjutkan yang sudah tercatat
@@ -293,7 +297,7 @@ function formAset(id,isi={}){
  dlg.innerHTML=`<form method="dialog" id="f" novalidate>
   <h3>${isNew?'Tambah aset':'Edit aset'}</h3><div id="ferr"></div>
   <div class="scan"><div id="scanPrev">${FOTO[v.id]&&!isNew?`<img src="${FOTO[v.id]}" alt="">`:ic('camera')}</div><div>
-   <div class="scan-b"><button type="button" class="btn primary sm" onclick="scanAlat()">${ic('camera')} Foto label, isi otomatis</button><button type="button" class="btn sm" onclick="fotoSaja()">Foto saja</button>${!isNew&&FOTO[v.id]?`<button type="button" class="btn sm danger" id="hapusFoto">Hapus foto</button>`:''}</div>
+   <div class="scan-b"><button type="button" class="btn primary" onclick="scanAlat()">${ic('camera')} Foto label, isi otomatis</button><button type="button" class="btn" onclick="fotoSaja()">${ic('camera')} Foto saja</button>${!isNew&&FOTO[v.id]?`<button type="button" class="btn sm danger" id="hapusFoto">Hapus foto</button>`:''}</div>
    <p class="hint" id="scanSt">Foto pelat nama/label alat: nama, no. seri, dan kategori dibaca otomatis (OCR).</p></div></div>
   <div class="grp">Identitas</div>
   <div class="row2">${F('f-nama','Nama *',v.nama,'required autocomplete="off"')}${F('f-id','Kode aset *',v.id,'required placeholder="GF-XXX-000" autocapitalize="characters"')}</div>
