@@ -14,12 +14,14 @@ const SCAN_KAT=[
  [/SEISMOMET|GURALP|LENNARTZ|NANOMETRICS|SHORT PERIOD/i,'Alat ukur','Seismometer'],
  [/GEODE|SEISMOGRA|SMARTSEIS|SEISTRONIX|GEOPHONE/i,'Alat ukur','Seismik'],
  [/CG-?[56]\b|SCINTREX|LACOSTE|GRAVIMET/i,'Alat ukur','Gayaberat'],
+ [/SONIC ?VIEWER|SX-?5251/i,'Alat ukur','Karakterisasi batuan (Vp/Vs)'],
  [/\bGPS\b|GNSS|GARMIN|TRIMBLE|TOPCON|LEICA|TOTAL STATION|KOMPAS|COMPASS/i,'Alat ukur','Survei'],
  [/LAPTOP|NOTEBOOK|THINKPAD|ZBOOK|LATITUDE|MACBOOK/i,'Komputer','Laptop'],
  [/DESKTOP|OPTIPLEX|THINKCENTRE|PRODESK|\bPC\b/i,'Komputer','PC']
 ];
 const SCAN_MEREK=/GEOMETRICS|IRIS|AGI|ABEM|GEM SYSTEMS|MAL[AÅ]|GSSI|SENSORS ?& ?SOFTWARE|TRIMBLE|GARMIN|TOPCON|LEICA|SCINTREX|LACOSTE|GURALP|LENNARTZ|NANOMETRICS|LENOVO|DELL|HP\b|ASUS|ACER|APPLE/i;
 
+// SCAN_NAMA (opsional, diisi halaman): ganti nama kategori, mis. aplikasi Inventaris Lab memakai nama dari Excel stok opname
 // teks OCR → {nama, seri, jenis, kat}; kolom yang tidak ketemu dibiarkan kosong
 function parseLabel(text){
  const lines=text.split(/\r?\n/).map(s=>s.replace(/\s+/g,' ').trim()).filter(s=>s.length>2);
@@ -29,7 +31,7 @@ function parseLabel(text){
  // baris merek saja ("GEOMETRICS") digabung dengan baris model di bawahnya
  const baris=i<0?'':lines[i].split(' ').length<=2&&lines[i+1]?lines[i]+' '+lines[i+1]:lines[i];
  const nama=baris?baris.replace(/(?:S\/?N|SERIAL).*$/i,'').replace(/[^\w\s\-\/&().]/g,'').trim().slice(0,60):'';
- return {nama,seri:sn?sn[1].toUpperCase():'',jenis:k?k[1]:'',kat:k?k[2]:''};
+ return {nama,seri:sn?sn[1].toUpperCase():'',jenis:k?k[1]:'',kat:k?((typeof SCAN_NAMA!=='undefined'&&SCAN_NAMA[k[2]])||k[2]):''};
 }
 
 function ocrLoad(){
