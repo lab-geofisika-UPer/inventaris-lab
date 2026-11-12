@@ -1,6 +1,6 @@
 // Cache aplikasi supaya tetap bisa dibuka tanpa sinyal di lab/lapangan.
 // Ambil dari jaringan dulu (selalu versi terbaru bila online), cache hanya cadangan saat offline.
-const C='inventaris-lab-v3';
+const C='inventaris-lab-v4';
 const F=['./','index.html','qrcode.min.js','fotoscan.js','kodeaset.js','config.js','online.js','logo.png','manifest.json'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(C).then(c=>c.addAll(F)))});
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x))))));
