@@ -11,11 +11,14 @@ Satu file `index.html`, tanpa server dan tanpa login. Data tersimpan di **Indexe
   - catatan,
   - riwayat catatan bertanggal.
 - Foto alat diperkecil ke 640 px. Tombol **Foto label, isi otomatis** membaca pelat nama dengan OCR (`fotoscan.js`, salinan dari SIM).
-- Kode aset disarankan otomatis mengikuti Excel stok opname:
-  - Alat ukur: `GP-[metode][2 digit tahun pengadaan]-[nomor][jenis komponen]`, mis. `GP-GLS18-01A`. Metode: GLS, MAG, GPR, GRV, REF, PSF, GPS, SNV. Jenis komponen: A main unit, B kabel, C elektroda/geophone, D charger, E aksesoris, F sensor.
-  - PC: kode `GP-PC-001` dengan nama `COMPGP-PC01` (nomor selalu sama).
-  - Lainnya: `GP-LPT-001`, `GP-KRS-001`, `GP-MJA-001`.
-- Kolom tambahan: tahun pengadaan dan jenis komponen (keduanya juga ada di SIM).
+- Kode aset disarankan otomatis mengikuti `acuan_sistem_penamaan_inventaris_lab_geofisika.md` (v1.0, 10 Nov 2026), aturannya di `kodeaset.js` (salinan identik dengan SIM `prototype/kodeaset.js`):
+  - Format `SISTEM-TAHUN-KELAS-TIPE[-SPESIFIKASI]-NOMOR`, mis. `REF-18-RCV-GEO-V14-001`, `GPS-25-MAIN-R10-001`, `LAB-25-MES-TAP-50M-001`.
+  - Sistem dari kategori: Geolistrik ERT, Magnetik MAG, GPR GPR, Gravity GRV, Refraksi REF, Passive Seismic PAS, GPS GPS, Sonic Viewer RPH (proposed), lainnya LAB. GPS tetap di sistem GPS walaupun dipakai survei lain.
+  - Kelas: MAIN, RCV, CBL, CON, BAT, CHG, PWR, TRG, COM, STO, MES, CAL, TOL, SAF, IT, ACC, FUR (proposed, perabot).
+  - Nomor urut = identitas unit, bukan jumlah; nomor yang dihapus tidak dipakai ulang.
+  - PC: kode `LAB-21-IT-PC-001` dengan nama `COMPGP-PC01` (nomor selalu sama). Laptop `LAB-yy-IT-LPT-001`, kursi `LAB-yy-FUR-KRS-001`, meja `LAB-yy-FUR-MJA-001`.
+  - Data berkode lama (`GP-GLS18-01A`, `GP-PC-001`, dst.) dikonversi otomatis saat aplikasi dibuka atau cadangan lama dipulihkan. Kode lama dicatat di riwayat aset. Kode tanpa tahun menjadi `XX` dan harus dilengkapi lewat Edit.
+- Kolom tambahan: tahun pengadaan (juga ada di SIM). Rekap CSV memuat kolom Sistem, Kelas, Tipe, dan Spesifikasi kode.
 - Label QR 85 × 38 mm, 2 kolom per A4, dengan desain yang sama seperti label SIM.
 - Pindai QR atau barcode dari foto (Chrome Android, lewat `BarcodeDetector`).
 - Menu ⋯:
