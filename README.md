@@ -46,4 +46,5 @@ Field tambahan yang belum dikenal SIM: `catatan`, `riwayat [{id, tgl, isi}]`, `a
 - `config.js` berisi `INV_API` (URL `/exec`). Kosong = mode offline seperti sebelumnya (data hanya di HP).
 - `online.js`: masuk dengan **sandi staf**, kirim perubahan (per aset, foto hanya bila berubah), tarik data terbaru saat dibuka, foto diambil di latar belakang. HP tetap menyimpan salinan, jadi bisa dipakai tanpa sinyal.
 - Server: `apps-script/Kode.gs` + `appsscript.json`, cara pasang di `apps-script/PANDUAN.md`. Folder `apps-script/` tidak ikut ke GitHub.
+- Arsip harian otomatis di folder Drive `Arsip Inventaris` (`Arsip_Inventaris_TTTT-BB-HH.json`, tanpa foto, format ekspor SIM).
 - Dua staf mengubah aset yang sama: simpanan terakhir yang dipakai.
