@@ -252,13 +252,17 @@ function vDetail(){
  <div class="acts"><button class="btn primary" onclick="formAset('${esc(a.id)}')">${ic('edit')} Edit</button><button class="btn" onclick="labelQR(['${esc(a.id)}'])">${ic('qr')} Label QR</button><button class="btn danger" onclick="hapus('${esc(a.id)}')">${ic('trash')} Hapus</button></div>
  <div class="det"><div class="det-f">${FOTO[a.id]?`<img src="${FOTO[a.id]}" alt="Foto ${esc(a.nama)}">`:ic('camera')}</div>
  <div class="card"><dl class="kv">
-  ${row('Jenis',esc(a.jenis))}${row('Kategori',esc(a.kat))}${row('Kelas',esc(kodeUrai(a.id)&&kelasAsetTxt(kodeUrai(a.id).kls)))}${row('Tahun pengadaan',esc(a.tahun))}${row('Kondisi',kBadge(a.kondisi))}${row('Jumlah',jmlRinci(a))}
+  ${row('Jenis',esc(a.jenis))}${row('Kategori',esc(a.kat))}${row('Kelas',esc(kodeUrai(a.id)&&kelasAsetTxt(kodeUrai(a.id).kls)))}${(i=>row('Bagian dari',i&&`<a class="mono" href="#a/${encodeURIComponent(i)}">${esc(i)}</a> ${esc((A.find(x=>x.id===i)||{}).nama||'(tidak ditemukan)')}`))(indukOf(a,A))}${row('Tahun pengadaan',esc(a.tahun))}${row('Kondisi',kBadge(a.kondisi))}${row('Jumlah',jmlRinci(a))}
   ${row('Lokasi',esc(lokTxt(a)))}${row('Pemakaian',esc(MODE_TXT[a.mode]||a.mode))}
   ${row('No. inventaris',esc(a.noInv))}${row('No. seri',esc(a.seri))}${row('Kalibrasi berikutnya',a.kalibrasi?fmt(a.kalibrasi):'')}
   ${row('Spesifikasi',esc(a.spek))}${row('Aplikasi terpasang',esc(a.aplikasi).replace(/\n/g,'<br>'))}${row('Garansi sampai',a.garansi?fmt(a.garansi):'')}${row('Catatan',esc(a.catatan).replace(/\n/g,'<br>'))}
   ${row('Terakhir diubah',a.diubah?new Date(a.diubah).toLocaleString('id-ID'):'')}
  </dl></div></div>
  ${(a.kelengkapan||[]).length?`<div class="card kel"><h2>Kelengkapan (${a.kelengkapan.length})</h2><table><thead><tr><th>Nama</th><th>Jml</th><th>No. seri</th><th>Kondisi</th><th>Simpan</th></tr></thead><tbody>${a.kelengkapan.map(k=>`<tr><td>${esc(k.nama)}</td><td>${k.jumlah}</td><td>${esc(k.seri)}</td><td>${kBadge(k.kondisi)}</td><td>${esc(k.simpan)}</td></tr>`).join('')}</tbody></table></div>`:''}
+ ${(kodeUrai(a.id)||{}).kls==='MAIN'?(km=>`<div class="card kel"><h2>Komponen ber-kode (${km.length})</h2>
+  ${km.length?`<table><thead><tr><th>Kode</th><th>Nama</th><th>Kondisi</th></tr></thead><tbody>${km.map(k=>`<tr><td><a class="mono" href="#a/${encodeURIComponent(k.id)}">${esc(k.id)}</a></td><td>${esc(k.nama)}</td><td>${kBadge(k.kondisi)}</td></tr>`).join('')}</tbody></table>`
+   :'<p class="sub" style="margin:4px 10px 10px">Belum ada. Kabel, geophone, charger, dll. yang punya label sendiri bisa ditautkan ke alat ini.</p>'}
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 10px 10px"><button class="btn sm" onclick="tambahKomponen('${esc(a.id)}')">${ic('plus')} Tambah komponen</button>${km.length?`<button class="btn sm" onclick='labelQR(${esc(JSON.stringify([a.id,...km.map(k=>k.id)]))})'>${ic('qr')} Label alat + komponen</button>`:''}</div></div>`)(komponenDari(a.id,A)):''}
  <div class="card kel"><h2>Riwayat catatan</h2>
   <form class="rw-f" onsubmit="event.preventDefault();tambahCatatan('${esc(a.id)}')"><input type="date" id="rw-t" value="${today()}" aria-label="Tanggal"><input id="rw-i" placeholder="mis. 2 kursi patah kaki, dipindah ke gudang" aria-label="Isi catatan" required><button class="btn sm primary">${ic('plus')} Catat</button></form>
   ${(a.riwayat||[]).length?`<ul class="rw">${a.riwayat.slice().sort((x,y)=>y.tgl.localeCompare(x.tgl)).map(r=>`<li><span class="sub">${fmt(r.tgl)}</span><span>${esc(r.isi)}</span><button class="btn sm" aria-label="Hapus catatan" onclick="hapusCatatan('${esc(a.id)}','${esc(r.id)}')">${ic('x')}</button></li>`).join('')}</ul>`:'<p class="sub" style="margin:4px 10px 10px">Belum ada catatan. Catat kejadian seperti kerusakan, servis, atau pindah tempat.</p>'}
@@ -316,9 +320,10 @@ function formAset(id,isi={}){
    <div class="field"><label for="f-kat">Kategori</label><select id="f-kat"></select><input id="f-katb" placeholder="Nama kategori baru" aria-label="Nama kategori baru" style="margin-top:6px" hidden></div>
   </div>
   <div class="row2">${F('f-thn','Tahun pengadaan',v.tahun,'type="number" min="1990" max="2099" inputmode="numeric" placeholder="mis. 2018"')}
-   <div class="field"><label for="f-kls">Kelas</label><select id="f-kls">${KELAS.map(([k,t])=>`<option value="${k}"${k===((kodeUrai(v.id)||{}).kls||(KAT_BAWAAN[v.kat]||[])[0]||'MAIN')?' selected':''}>${k} · ${t}</option>`).join('')}</select></div></div>
+   <div class="field"><label for="f-kls">Kelas</label><select id="f-kls">${KELAS.map(([k,t])=>`<option value="${k}"${k===((kodeUrai(v.id)||{}).kls||(v.induk?'CBL':'')||(KAT_BAWAAN[v.kat]||[])[0]||'MAIN')?' selected':''}>${k} · ${t}</option>`).join('')}</select></div></div>
   <div class="row2">${F('f-tipe','Tipe',(kodeUrai(v.id)||{}).tipe||(KAT_BAWAAN[v.kat]||[])[1],'list="tipe-list" maxlength="10" autocapitalize="characters" placeholder="mis. GEO, CG5, R10"')}${F('f-spec','Spesifikasi pembeda',(kodeUrai(v.id)||{}).spec,'maxlength="10" autocapitalize="characters" placeholder="opsional, mis. V14, 400, 50M"')}</div>
   <datalist id="tipe-list">${TIPE_KAMUS.map(([k,t])=>`<option value="${k}">${t}</option>`).join('')}</datalist>
+  <div class="field" id="f-induk-w"><label for="f-induk">Bagian dari (alat utama)</label><select id="f-induk"><option value="">— Berdiri sendiri —</option>${utamaList(A).filter(x=>x.id!==v.id).map(x=>`<option value="${esc(x.id)}"${x.id===indukOf(v,A)?' selected':''}>${esc(x.id)} · ${esc(x.nama)}</option>`).join('')}</select><p class="hint">Komponen tetap punya kode dan label QR sendiri. Memilih alat utama menyamakan kategori dan tahunnya.</p></div>
   <p class="hint" style="margin:-4px 0 12px">Kode: SISTEM-TAHUN-KELAS-TIPE-SPESIFIKASI-NOMOR, mis. REF-18-RCV-GEO-V14-001. Sistem dari kategori: <b id="f-sys"></b>. PC: LAB-21-IT-PC-001 dengan nama COMPGP-PC01. Kode aset permanen, ubah hanya untuk koreksi. Tanda * = kode usulan.</p>
   <div class="row2">${F('f-inv','Nomor inventaris kampus',v.noInv,'placeholder="Diisi manual"')}
    <div class="field"><label for="f-kond">Kondisi</label><select id="f-kond">${KOND.map(k=>`<option${k===(v.kondisi||'Baik')?' selected':''}>${k}</option>`).join('')}</select></div></div>
@@ -358,11 +363,16 @@ function formAset(id,isi={}){
   if(!$('#f-id').dataset.manual)$('#f-id').value=saranKode(kat,$('#f-thn').value.trim(),$('#f-kls').value,$('#f-tipe').value,$('#f-spec').value,isNew?'':a.id);
   if(!isNew)return;
   if(kat==='PC'&&(!nm.value.trim()||nm.dataset.auto)){nm.value=saranPC();nm.dataset.auto='1'}else if(kat!=='PC'&&nm.dataset.auto){nm.value='';delete nm.dataset.auto}};
- fillKat(v.kat);sync();kodeOto(isNew&&!v.id,true);
- $('#f-id').oninput=()=>$('#f-id').dataset.manual='1';
+ // alat utama disarankan dari SYSTEM+tahun kode (aset baru, selama staf belum memilih sendiri)
+ let indukPilih=!isNew||!!v.induk;
+ const indukOto=()=>{$('#f-induk-w').hidden=$('#f-kls').value==='MAIN';if(indukPilih)return;const t=indukTebak($('#f-id').value,A);if([...$('#f-induk').options].some(o=>o.value===t))$('#f-induk').value=t};
+ fillKat(v.kat);sync();kodeOto(isNew&&!v.id&&!v.induk,true);indukOto();
+ $('#f-id').oninput=()=>{$('#f-id').dataset.manual='1';indukOto()};
  $('#f-nama').oninput=()=>delete $('#f-nama').dataset.auto;
- $('#f-kat').onchange=()=>{$('#f-katb').hidden=$('#f-kat').value!=='__baru';if(!$('#f-katb').hidden)$('#f-katb').focus();kodeOto(true)};
- ['f-katb','f-thn','f-tipe','f-spec'].forEach(i=>$('#'+i).oninput=()=>kodeOto());$('#f-kls').onchange=()=>kodeOto();
+ $('#f-kat').onchange=()=>{$('#f-katb').hidden=$('#f-kat').value!=='__baru';if(!$('#f-katb').hidden)$('#f-katb').focus();kodeOto(true);indukOto()};
+ ['f-katb','f-thn','f-tipe','f-spec'].forEach(i=>$('#'+i).oninput=()=>{kodeOto();indukOto()});$('#f-kls').onchange=()=>{kodeOto();indukOto()};
+ $('#f-induk').onchange=()=>{indukPilih=true;const m=A.find(x=>x.id===$('#f-induk').value);if(!m)return;
+  if($('#f-jenis').value!==m.jenis){$('#f-jenis').value=m.jenis;sync()}fillKat(m.kat);if(m.tahun)$('#f-thn').value=m.tahun;kodeOto()};
  $('#f-jenis').onchange=()=>{fillKat('');if(isNew)$('#f-mode').value=$('#f-jenis').value==='Alat ukur'?'Disewakan':'Tetap';sync();kodeOto(true)};
  $('#f-mode').onchange=sync;
  if($('#hapusFoto'))$('#hapusFoto').onclick=()=>{hapusF=true;scanFoto=null;$('#scanPrev').innerHTML=ic('camera');$('#hapusFoto').remove()};
@@ -388,7 +398,9 @@ function formAset(id,isi={}){
    seri:['Alat ukur','Komputer','Lainnya'].includes(jenis)?$('#f-seri').value.trim():'',spek:['Komputer','Lainnya'].includes(jenis)?$('#f-spek').value.trim():'',
    garansi:jenis==='Komputer'?$('#f-gar').value:'',aplikasi:jenis==='Komputer'?$('#f-app').value.trim():'',
    jumlah:bulk&&j>0?j:undefined,satuan:bulk?($('#f-sat').value.trim()||'unit'):undefined,jmlRusak:bulk?jr:undefined,jmlServis:bulk?js:undefined,
-   tahun:thn,tipe:undefined,catatan:$('#f-cat').value.trim(),kelengkapan:kel,diubah:new Date().toISOString()});
+   tahun:thn,tipe:undefined,catatan:$('#f-cat').value.trim(),kelengkapan:kel,diubah:new Date().toISOString(),
+   induk:((kodeUrai(nid)||{}).kls||$('#f-kls').value)==='MAIN'?undefined:$('#f-induk').value});
+  if(o.induk===nid)return err('Aset tidak bisa menjadi bagian dari dirinya sendiri.');
   try{
    await tx(['aset','foto'],(s,f)=>{
     if(!isNew&&nid!==a.id){s.delete(a.id);if(FOTO[a.id]&&!scanFoto&&!hapusF)f.put(FOTO[a.id],nid);f.delete(a.id)}
@@ -399,6 +411,7 @@ function formAset(id,isi={}){
   if(!isNew&&nid!==a.id){if(FOTO[a.id]&&!scanFoto&&!hapusF)FOTO[nid]=FOTO[a.id];delete FOTO[a.id]}
   if(scanFoto)FOTO[nid]=scanFoto;else if(hapusF)delete FOTO[nid];
   const i=A.findIndex(x=>x.id===(a?a.id:nid));if(i>=0)A[i]=o;else A.push(o);
+  if(!isNew&&nid!==a.id)await pindahInduk(a.id,nid);
   await tandaiUbah();
   $('#dlg').close();toast(isNew?'Aset ditambahkan.':'Aset diperbarui.');
   if(isNew){go('detail',nid);labelQR([nid])}else go('detail',nid);
@@ -421,15 +434,18 @@ function fotoKecil(file,max=640,q=.75){
 async function hapus(id){
  const a=A.find(x=>x.id===id);if(!a||!confirm(`Hapus ${a.nama} (${id})? Tindakan ini tidak bisa dibatalkan.`))return;
  await tx(['aset','foto'],(s,f)=>{s.delete(id);f.delete(id)});
- A=A.filter(x=>x.id!==id);delete FOTO[id];await tandaiUbah();toast('Aset dihapus.');go('list');
+ A=A.filter(x=>x.id!==id);delete FOTO[id];await pindahInduk(id,'');await tandaiUbah();toast('Aset dihapus.');go('list');
 }
+// kode alat utama berubah/dihapus: komponennya ikut pindah (atau jadi berdiri sendiri)
+async function pindahInduk(lama,baru){const c=A.filter(x=>x.induk===lama);if(!c.length)return;c.forEach(x=>{x.induk=baru;x.diubah=new Date().toISOString()});await tx('aset',s=>c.forEach(x=>s.put(x)))}
+function tambahKomponen(id){const m=A.find(x=>x.id===id);if(m)formAset(null,{induk:id,jenis:m.jenis,kat:m.kat,tahun:m.tahun,mode:m.mode,lokasi:m.lokasi,ruang:m.ruang,kondisi:'Baik'})}
 
 /* ---------- label QR (desain sama dengan label SIM) ---------- */
 // tanpa domain: QR berisi alamat aplikasi ini + #a/KODE; dibuka dari file lokal, QR berisi kode saja
 const qrIsi=id=>location.protocol.startsWith('http')?location.origin+location.pathname+'#a/'+encodeURIComponent(id):id;
 function qrSvg(t){const q=qrcode(0,'M');q.addData(t);q.make();return q.createSvgTag({cellSize:4,margin:2,scalable:true})}
 const labelHTML=a=>`<div class="qrl"><div class="qrl-q">${qrSvg(qrIsi(a.id))}</div><div class="qrl-t"><div class="qrl-h"><img src="${new URL('logo.png',location.href).href}" alt="">Lab Teknik Geofisika · UPer</div>
- <b>${esc(a.nama)}</b><span class="qrl-k">${esc(a.id)}</span><span class="qrl-d">S/N: ${esc(a.seri||'…………………')}</span><span class="qrl-d">No. Inv: ${esc(a.noInv||'…………………')}</span><small>Pindai untuk detail</small></div></div>`;
+ <b>${esc(a.nama)}</b><span class="qrl-k">${esc(a.id)}</span><span class="qrl-d">S/N: ${esc(a.seri||'…………………')}</span><span class="qrl-d">No. Inv: ${esc(a.noInv||'…………………')}</span><small>${indukOf(a,A)?'Bagian dari '+esc(indukOf(a,A)):'Pindai untuk detail'}</small></div></div>`;
 function labelQR(ids){
  const L=ids.map(id=>A.find(a=>a.id===id)).filter(Boolean);if(!L.length)return toast('Belum ada aset.');
  const dlg=$('#dlg');
@@ -475,8 +491,8 @@ async function ekspor(){
 // teks bertab UTF-16 + BOM: Excel membukanya per kolom apa pun pemisah daftar di Windows (Indonesia memakai ";")
 const tsvSel=v=>{v=String(v??'').replace(/[\t\r\n]+/g,' ');return /^[=+\-@]/.test(v)?"'"+v:v};
 function eksporCSV(){
- const H=['Kode','Nama','Jenis','Kategori','Sistem','Kelas','Tipe','Spesifikasi kode','Tahun pengadaan','No. inventaris','No. seri','Lokasi','Kondisi','Jumlah','Satuan','Rusak','Perlu servis','Kalibrasi berikutnya','Spesifikasi','Aplikasi terpasang','Garansi','Pemakaian','Kelengkapan','Catatan','Riwayat catatan','Ada foto'];
- const R=A.slice().sort((a,b)=>a.id.localeCompare(b.id)).map(a=>[a.id,a.nama,a.jenis,a.kat,...(u=>u?[u.sys,u.kls,u.tipe,u.spec]:['','','',''])(kodeUrai(a.id)),a.tahun,a.noInv,a.seri,lokTxt(a),a.kondisi||'Baik',a.jumlah||1,a.satuan||'unit',a.jmlRusak||0,a.jmlServis||0,a.kalibrasi,a.spek,(a.aplikasi||'').split('\n').filter(Boolean).join(', '),a.garansi,MODE_TXT[a.mode]||a.mode,
+ const H=['Kode','Nama','Jenis','Kategori','Sistem','Kelas','Tipe','Spesifikasi kode','Tahun pengadaan','No. inventaris','No. seri','Lokasi','Kondisi','Jumlah','Satuan','Rusak','Perlu servis','Kalibrasi berikutnya','Spesifikasi','Aplikasi terpasang','Garansi','Pemakaian','Bagian dari','Kelengkapan','Catatan','Riwayat catatan','Ada foto'];
+ const R=A.slice().sort((a,b)=>a.id.localeCompare(b.id)).map(a=>[a.id,a.nama,a.jenis,a.kat,...(u=>u?[u.sys,u.kls,u.tipe,u.spec]:['','','',''])(kodeUrai(a.id)),a.tahun,a.noInv,a.seri,lokTxt(a),a.kondisi||'Baik',a.jumlah||1,a.satuan||'unit',a.jmlRusak||0,a.jmlServis||0,a.kalibrasi,a.spek,(a.aplikasi||'').split('\n').filter(Boolean).join(', '),a.garansi,MODE_TXT[a.mode]||a.mode,indukOf(a,A),
   (a.kelengkapan||[]).map(k=>`${k.nama} (${k.jumlah}${k.seri?', '+k.seri:''}, ${k.kondisi})`).join('; '),a.catatan,(a.riwayat||[]).map(r=>`${r.tgl}: ${r.isi}`).join(' | '),FOTO[a.id]?'Ya':'Tidak']);
  const s='﻿'+[H,...R].map(r=>r.map(tsvSel).join('\t')).join('\r\n'),b=new Uint8Array(s.length*2);
  for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);b[2*i]=c&255;b[2*i+1]=c>>8}

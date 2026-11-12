@@ -34,6 +34,18 @@ function kodeBuat({sys,thn,kls,tipe,spec},ids,nomor){
 // PC berpasangan: LAB-21-IT-PC-001 ↔ nama COMPGP-PC01; nomor melanjutkan yang terbesar dari keduanya (lintas tahun)
 function nomorPCdari(assets){const n=assets.flatMap(a=>[(/^COMPGP-PC(\d+)$/i.exec(a.nama)||[])[1],(/^[A-Z]+-(?:\d{2}|XX)-IT-PC-(\d{3})$/.exec(a.id)||[])[1]]).filter(Boolean).map(Number);return (n.length?Math.max(...n):0)+1}
 
+/* ---------- keterkaitan komponen ber-kode (acuan bab 9) ----------
+   Komponen (kelas selain MAIN) punya kode & label sendiri, ditautkan ke alat utama lewat field induk = kode alat utama.
+   Data lama tanpa induk: ditebak dari SYSTEM+tahun, hanya bila ada tepat satu main unit di kelompok itu. */
+const utamaList=assets=>assets.filter(a=>{const u=kodeUrai(a.id);return u&&u.kls==='MAIN'}).sort((x,y)=>x.id.localeCompare(y.id));
+function indukTebak(id,assets){
+ const u=kodeUrai(id);if(!u||u.kls==='MAIN'||u.sys==='LAB')return '';
+ const m=utamaList(assets).filter(a=>{const v=kodeUrai(a.id);return v.sys===u.sys&&v.yy===u.yy});
+ return m.length===1?m[0].id:'';
+}
+const indukOf=(a,assets)=>a?(a.induk!==undefined?a.induk:indukTebak(a.id,assets)):'';
+const komponenDari=(id,assets)=>assets.filter(x=>x.id!==id&&indukOf(x,assets)===id).sort((x,y)=>x.id.localeCompare(y.id));
+
 /* ---------- konversi kode lama (GP-GLS18-01A, GP-PC-001, GP-KRS-001) ---------- */
 const LAMA_SYS={GLS:'ERT',PSF:'PAS',SNV:'RPH'},LAMA_KLS={A:'MAIN',B:'CBL',C:'RCV',D:'CHG',E:'ACC',F:'RCV'};
 const TEBAK=[[/iris|syscal/i,'IRIS'],[/geophone/i,'GEO'],[/anten/i,'ANT'],[/elektroda|electrode/i,'ELE'],[/hydrophone/i,'HYD'],[/\bR10\b/i,'R10'],[/CG-?5/i,'CG5'],[/G-?857/i,'G857'],
