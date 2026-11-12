@@ -151,6 +151,8 @@ dialog h3{margin:0 0 12px;font-size:19px}
 <dialog id="dlg"></dialog>
 
 <script src="kodeaset.js"></script>
+<script src="config.js"></script>
+<script src="online.js"></script>
 <script>
 /* Inventaris Lab (22 Okt 2026): aplikasi pendata inventaris untuk HP, sebelum SIM online.
    Model data SAMA dengan db.assets di SIM (prototype/inventaris.js), foto sama dengan FOTO di foto.js,
@@ -201,7 +203,7 @@ async function muat(){
   A.filter(a=>baru.includes(a.id)).forEach(a=>{s.put(a);if(FOTO[a.id])f.put(FOTO[a.id],a.id)})});
 }
 const simpanMeta=()=>tx('meta',m=>m.put(META,'meta'));
-async function tandaiUbah(){META.ubah=new Date().toISOString();await simpanMeta();if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}
+async function tandaiUbah(){META.ubah=new Date().toISOString();await simpanMeta();if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();if(ONLINE)SYNC.simpan()}
 
 /* ---------- tampilan ---------- */
 const st={q:'',fj:'Semua',fl:'Semua',fk:'Semua',view:'list',id:null};
@@ -504,7 +506,10 @@ function menuIsi(){
  <button onclick="tutupMenu();eksporCSV()">${ic('sheet')} Rekap ke Excel (CSV)</button><hr>
  <button onclick="tutupMenu();ekspor()">${ic('down')} Cadangkan / ekspor untuk SIM</button>
  <button onclick="tutupMenu();impor()">${ic('up')} Pulihkan dari cadangan</button>
- <small>Cadangan terakhir: ${c}</small>`;
+ <small>Cadangan terakhir: ${c}</small>`+(ONLINE?`<hr>
+ <button onclick="tutupMenu();SYNC.muatUlang()">${ic('sheet')} Muat ulang dari Google Sheet</button>
+ <button onclick="tutupMenu();SYNC.keluar()">${ic('up')} Keluar (lupakan sandi di HP ini)</button>
+ <small id="sinkron">${esc(SYNC.status())}</small>`:'<small>Mode offline: data hanya di HP ini.</small>');
 }
 function tutupMenu(){$('#menu').hidden=true;$('#menuBtn').setAttribute('aria-expanded','false')}
 $('#menuBtn').onclick=e=>{e.stopPropagation();const m=$('#menu');m.innerHTML=menuIsi();m.hidden=!m.hidden;$('#menuBtn').setAttribute('aria-expanded',String(!m.hidden))};
@@ -522,7 +527,8 @@ $('#menuBtn').innerHTML=ic('more');$('#scanBtn').innerHTML=ic('qr');$('#scanBtn'
 let t0;try{t0=localStorage.getItem('inv-theme')}catch(e){}
 setTheme(t0||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
 
-muat().then(()=>{const m=location.hash.match(/^#a\/(.+)/),id=m&&decodeURIComponent(m[1]);if(id&&A.some(a=>a.id===id)){st.view='detail';st.id=id}render(true)})
+const bukaHash=()=>{const m=location.hash.match(/^#a\/(.+)/),id=m&&decodeURIComponent(m[1]);if(id&&A.some(a=>a.id===id)){st.view='detail';st.id=id}render(true)};
+muat().then(()=>{bukaHash();if(ONLINE)SYNC.mulai().then(bukaHash)})
  .catch(e=>{$('#app').innerHTML=`<div class="card empty">Penyimpanan browser tidak bisa dibuka (${esc(e&&e.message)}). Jangan pakai mode penyamaran/incognito.</div>`});
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js');
 </script>

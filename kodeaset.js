@@ -36,7 +36,7 @@ function nomorPCdari(assets){const n=assets.flatMap(a=>[(/^COMPGP-PC(\d+)$/i.exe
 
 /* ---------- konversi kode lama (GP-GLS18-01A, GP-PC-001, GP-KRS-001) ---------- */
 const LAMA_SYS={GLS:'ERT',PSF:'PAS',SNV:'RPH'},LAMA_KLS={A:'MAIN',B:'CBL',C:'RCV',D:'CHG',E:'ACC',F:'RCV'};
-const TEBAK=[[/geophone/i,'GEO'],[/anten/i,'ANT'],[/elektroda|electrode/i,'ELE'],[/hydrophone/i,'HYD'],[/\bR10\b/i,'R10'],[/CG-?5/i,'CG5'],[/G-?857/i,'G857'],
+const TEBAK=[[/iris|syscal/i,'IRIS'],[/geophone/i,'GEO'],[/anten/i,'ANT'],[/elektroda|electrode/i,'ELE'],[/hydrophone/i,'HYD'],[/\bR10\b/i,'R10'],[/CG-?5/i,'CG5'],[/G-?857/i,'G857'],
  [/meteran|tape/i,'TAP'],[/helm/i,'HLM'],[/headlamp/i,'HDL'],[/solder/i,'SLD'],[/obeng/i,'SCR'],[/\btang\b/i,'PLI'],[/kunci/i,'WRE'],[/multimeter/i,'DMM'],[/\bcase\b|koper|toolbox/i,'CAS']];
 // tipe dari nama; kalau tidak dikenal: 3 huruf awal nama (perlu dicek staf)
 const tebakTipe=nama=>(TEBAK.find(([r])=>r.test(nama||''))||[])[1]||kodeBersih((nama||'').normalize('NFD').replace(/[^A-Za-z]/g,'')).slice(0,3)||'UNK';

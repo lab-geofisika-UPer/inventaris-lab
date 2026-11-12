@@ -40,3 +40,10 @@ Field tambahan yang belum dikenal SIM: `catatan`, `riwayat [{id, tgl, isi}]`, `a
 - Data hanya ada di satu perangkat. Cadangkan berkala; aplikasi memberi peringatan bila ada perubahan yang belum dicadangkan.
 - Jangan dibuka dalam mode penyamaran (incognito), karena data akan hilang saat tab ditutup.
 - QR berisi alamat aplikasi + `#a/KODE`. Kalau alamat aplikasi pindah (mis. ke subdomain SIM), label perlu dicetak ulang.
+
+## Mode online (Google Sheet + Drive)
+- Pola sama dengan Timesheet Asisten: tampilan tetap di GitHub Pages, data di Google Sheet, foto di folder Drive, lewat web app Apps Script.
+- `config.js` berisi `INV_API` (URL `/exec`). Kosong = mode offline seperti sebelumnya (data hanya di HP).
+- `online.js`: masuk dengan **sandi staf**, kirim perubahan (per aset, foto hanya bila berubah), tarik data terbaru saat dibuka, foto diambil di latar belakang. HP tetap menyimpan salinan, jadi bisa dipakai tanpa sinyal.
+- Server: `apps-script/Kode.gs` + `appsscript.json`, cara pasang di `apps-script/PANDUAN.md`. Folder `apps-script/` tidak ikut ke GitHub.
+- Dua staf mengubah aset yang sama: simpanan terakhir yang dipakai.
